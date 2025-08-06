@@ -33,4 +33,10 @@ action:
             data:
               entity_id: "{{ entity }}"
               temperature: "{{ value | float }}"
-
+      - conditions: "{{ cmd == 'discover' }}"
+        sequence:
+          - service: mqtt.publish
+            data:
+              topic: lora/status
+              payload: >
+                {{ states | map(attribute='entity_id') | list | join(', ') }}
