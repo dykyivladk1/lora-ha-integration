@@ -1,0 +1,36 @@
+blueprint:
+  name: LORA Universal Command
+  description: Обрабатывает команды от LORA через MQTT (turn_on, turn_off, set)
+  domain: automation
+  source_url: https://github.com/YOUR_GITHUB/lora-blueprints/blob/main/lora_universal_command.yaml
+  input: {}
+
+trigger:
+  platform: mqtt
+  topic: lora/control
+
+variables:
+  parts: "{{ trigger.payload.split(' ') }}"
+  cmd: "{{ parts[0] }}"
+  entity: "{{ parts[1] }}"
+  value: "{{ parts[3] if parts|length > 3 else None }}"
+
+action:
+  - choose:
+      - conditions: "{{ cmd == 'turn_on' }}"
+        sequence:
+          - service: homeassistant.turn_on
+            target:
+              entity_id: "{{ entity }}"
+      - conditions: "{{ cmd == 'turn_off' }}"
+        sequence:
+          - service: homeassistant.turn_off
+            target:
+              entity_id: "{{ entity }}"
+      - conditions: "{{ cmd == 'set' }}"
+        sequence:
+          - service: climate.set_temperature
+            data:
+              entity_id: "{{ entity }}"
+              temperature: "{{ value | float }}"
+
