@@ -11,12 +11,10 @@ trigger:
 
 variables:
   parts: "{{ trigger.payload.split(' ') }}"
-  cmd: "{{ parts[0] }}"
-  entity: "{{ parts[1] }}"
+  cmd: "{{ parts[0] if parts|length > 0 else '' }}"
+  entity: "{{ parts[1] if parts|length > 1 else '' }}"
   value: "{{ parts[3] if parts|length > 3 else None }}"
 
-
-  
 action:
   - choose:
       - conditions: "{{ cmd == 'turn_on' }}"
@@ -51,10 +49,12 @@ action:
             data:
               topic: lora/status
               payload: >-
-                {{ {
-                  "entity_id": entity,
-                  "state": states(entity),
-                  "attributes": {
-                    "temperature": state_attr(entity, 'temperature')
-                  }
-                } | to_json }}
+                {{
+                  {
+                    "entity_id": entity,
+                    "state": states(entity),
+                    "attributes": {
+                      "temperature": state_attr(entity, 'temperature')
+                    }
+                  } | to_json
+                }}
