@@ -1,6 +1,6 @@
 blueprint:
   name: LORA Universal Command
-  description: Обрабатывает команды от LORA через MQTT (turn_on, turn_off, set)
+  description: Handles commands from LORA via MQTT (turn_on, turn_off, set, discover, get_state)
   domain: automation
   source_url: https://github.com/YOUR_GITHUB/lora-blueprints/blob/main/lora_universal_command.yaml
   input: {}
@@ -22,26 +22,26 @@ action:
           - service: homeassistant.turn_on
             target:
               entity_id: "{{ entity }}"
+
       - conditions: "{{ cmd == 'turn_off' }}"
         sequence:
           - service: homeassistant.turn_off
             target:
               entity_id: "{{ entity }}"
+
       - conditions: "{{ cmd == 'set' }}"
         sequence:
           - service: climate.set_temperature
             data:
               entity_id: "{{ entity }}"
               temperature: "{{ value | float }}"
+
       - conditions: "{{ cmd == 'discover' }}"
         sequence:
           - service: mqtt.publish
             data:
               topic: lora/status
-              payload: >
-                {{ states | map(attribute='entity_id') | list | join(', ') }}
-
-
+              payload: "{{ states | map(attribute='entity_id') | list | join(', ') }}"
 
       - conditions: "{{ cmd == 'get_state' }}"
         sequence:
@@ -52,5 +52,5 @@ action:
                 {
                   "entity_id": "{{ entity }}",
                   "state": "{{ states(entity) }}",
-                  "attributes": {{ state_attr(entity, 'temperature') if state_attr(entity, 'temperature') else '{}' }}
+                  "attributes": {{ state_attr(entity, None) | tojson }}
                 }
