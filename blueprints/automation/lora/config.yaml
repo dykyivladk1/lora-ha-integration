@@ -1,8 +1,8 @@
 blueprint:
   name: LORA Universal Command
-  description: Обрабатывает команды от LORA через MQTT (turn_on, turn_off, set)
+  description: Handles commands from LORA via MQTT (turn_on, turn_off, set, discover, get_state)
   domain: automation
-  source_url: https://github.com/YOUR_GITHUB/lora-blueprints/blob/main/lora_universal_command.yaml
+  source_url: https://github.com/dykyivladk1/lora-ha-integration/blob/main/blueprints/automation/lora/lora_universal_command.yaml
   input: {}
 
 trigger:
@@ -15,6 +15,8 @@ variables:
   entity: "{{ parts[1] }}"
   value: "{{ parts[3] if parts|length > 3 else None }}"
 
+
+  
 action:
   - choose:
       - conditions: "{{ cmd == 'turn_on' }}"
