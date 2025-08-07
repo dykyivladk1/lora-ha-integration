@@ -40,3 +40,17 @@ action:
               topic: lora/status
               payload: >
                 {{ states | map(attribute='entity_id') | list | join(', ') }}
+
+
+
+      - conditions: "{{ cmd == 'get_state' }}"
+        sequence:
+          - service: mqtt.publish
+            data:
+              topic: lora/status
+              payload: >
+                {
+                  "entity_id": "{{ entity }}",
+                  "state": "{{ states(entity) }}",
+                  "attributes": {{ state_attr(entity, 'temperature') if state_attr(entity, 'temperature') else '{}' }}
+                }
